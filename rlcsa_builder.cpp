@@ -106,6 +106,23 @@ RLCSABuilder::insertFromFile(const std::string& base_name)
 }
 
 void
+RLCSABuilder::insertFromFile(const std::string& base_name, uchar* data)
+{
+  if(!this->ok) { return; }
+
+  #ifdef MULTITHREAD_SUPPORT
+  omp_set_num_threads(this->threads);
+  #endif
+
+  this->flush();
+
+  RLCSA* increment = new RLCSA(base_name);
+  usint data_size = increment->getSize() + increment->getNumberOfSequences();
+
+  this->addRLCSA(increment, data, data_size, false);
+}
+
+void
 RLCSABuilder::insertCollection(const std::string& base_name)
 {
   if(!this->ok) { return; }

@@ -22,6 +22,7 @@ class RLCSABuilder
 
     // Use this if you have already built an index for the file.
     void insertFromFile(const std::string& base_name);
+    void insertFromFile(const std::string& base_name, uchar* sequence);
 
     // Use this to build an index for the collection and merge it with the existing index.
     void insertCollection(const std::string& base_name);
