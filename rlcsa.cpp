@@ -14,8 +14,6 @@
 #include <omp.h>
 #endif
 
-
-
 namespace CSA
 {
 
@@ -194,6 +192,7 @@ RLCSA::RLCSA(RLCSA& index, RLCSA& increment, usint* positions, usint block_size,
   usint psi_size = this->data_size + this->number_of_sequences;
   bool should_be_ok = true;
 
+  double rt = realtime();
   #ifdef MULTITHREAD_SUPPORT
   omp_set_num_threads(threads);
   #endif
@@ -215,6 +214,7 @@ RLCSA::RLCSA(RLCSA& index, RLCSA& increment, usint* positions, usint block_size,
       }
     }
   }
+  fprintf(stderr, "[M::%s] RLCSA merged in %.3f sec..\n", __func__, realtime() - rt);
 
   this->ok = should_be_ok;
 }
@@ -1608,14 +1608,15 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
 
 
   // Build character tables etc.
+  double rt = realtime();
   usint distribution[CHARS];
   for(usint c = 0; c < CHARS; c++) { distribution[c] = 0; }
   for(usint i = 0; i < bytes; i++) { distribution[(usint)data[i]]++; }
   if(multiple_sequences) { distribution[0] = 0; } // \0 is an end marker
   this->alphabet = new Alphabet(distribution); this->data_size = this->alphabet->getDataSize();
 
-
   // Build suffix array.
+  rt = realtime();
   short_pair* sa = 0;
   if(multiple_sequences)
   {
@@ -1632,7 +1633,8 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
     simpleSuffixSort(sa, bytes, threads);
   }
   if(delete_data) { delete[] data; }
-
+  fprintf(stderr, "[M::%s] built SA in %.3f sec\n", __func__, realtime() - rt);
+  // rt = realtime();
 
   // Sample SA.
   if(sample_sa)
@@ -1647,7 +1649,8 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
   // Build Psi.
   #pragma omp parallel for schedule(static)
   for(usint i = 0; i < bytes; i++) { sa[i].first = sa[(sa[i].first + 1) % bytes].second; }
-
+//    fprintf(stderr, "[M::%s] built PSI in %.3f sec\n", __func__, realtime() - rt);
+//    rt = realtime();
 
   // Build RLCSA.
   #pragma omp parallel for schedule(dynamic, 1)
@@ -1675,6 +1678,7 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
     this->array[c] = new PsiVector(encoder, this->data_size + this->number_of_sequences);
   }
   delete[] sa;
+  // fprintf(stderr, "[M::%s] built RLCSA in %.3f sec\n", __func__, realtime() - rt);
 
 
   this->ok = true;

@@ -11,6 +11,12 @@
 #include <omp.h>
 #endif
 
+double realtime() {
+    struct timeval tp;
+    struct timezone tzp;
+    gettimeofday(&tp, &tzp);
+    return (double) tp.tv_sec + (double) tp.tv_usec * 1e-6;
+}
 
 namespace CSA
 {
@@ -228,6 +234,8 @@ packPairs(skew_pair* old_pairs, uint n)
 short_pair*
 prefixDoubling(short_pair* pairs, uint* keys, std::vector<ss_range>& unsorted, uint n, uint threads, uint total, uint h)
 {
+    double rt = realtime();
+    // double rt2 = realtime();
   // Double prefix length until sorted.
   while(total > 0)
   {
@@ -243,14 +251,18 @@ prefixDoubling(short_pair* pairs, uint* keys, std::vector<ss_range>& unsorted, u
       }
       sequentialSort(pairs + unsorted[i].first, pairs + unsorted[i].second + 1, key_comparator);
     }
+    // fprintf(stderr, "[M::%s] For cycle in %.3f sec..\n", __func__, realtime() - rt2);
+    // rt2 = realtime();
     total = setRanks(pairs, keys, n, unsorted, threads, chunk);
+    // fprintf(stderr, "[M::%s] Ranks set in %.3f sec..\n", __func__, realtime() - rt2);
     h *= 2;
-//    std::cout << "Sorted with h = " << h << ", unsorted total = " << total << " (" << unsorted.size() << " ranges)" << std::endl;
+    // std::cout << "Sorted with h = " << h << ", unsorted total = " << total << " (" << unsorted.size() << " ranges)" << std::endl;
   }
 
   #pragma omp parallel for schedule(static)
   for(uint i = 0; i < n; i++) { pairs[i].second = keys[i]; }
   delete[] keys; keys = 0;
+  fprintf(stderr, "[M::%s] Prefix doubling in %.3f sec..\n", __func__, realtime() - rt);
   return pairs;
 }
 
@@ -365,6 +377,7 @@ simpleSuffixSort(const uchar* sequence, uint n, uint sequences, uint threads)
 
   // Determine pack factor.
   uint limit = std::numeric_limits<uint>::max() / alphabet_size;
+  // std::cerr << "Limit: " << limit << std::endl;
   uint h = 1, pack_multiplier = 1;
   if(alphabet_size > 1)
   {
@@ -373,6 +386,7 @@ simpleSuffixSort(const uchar* sequence, uint n, uint sequences, uint threads)
 
   // Initialize pairs.
   uint zeros = 0, value = 0;
+
   for(uint i = 0; i < h; i++)
   {
     value *= alphabet_size;

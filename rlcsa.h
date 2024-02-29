@@ -16,7 +16,6 @@
 #include "sampler.h"
 #include "suffixarray.h"
 
-
 namespace CSA
 {
 

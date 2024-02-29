@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <fstream>
 #include <vector>
+#include <sys/time.h>
 
 #include "definitions.h"
 
@@ -11,6 +12,7 @@
 #include <omp.h>
 #endif
 
+double realtime();
 
 namespace CSA
 {

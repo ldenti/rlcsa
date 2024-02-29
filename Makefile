@@ -36,8 +36,8 @@ utils/split_text utils/sort_wikipedia utils/genpatterns
 VPATH = bits:misc:utils
 
 
-default: parallel_build build_rlcsa merge_rlcsa rlcsa_test sampler_test display_test \
-document_graph
+default: main
+# parallel_build build_rlcsa merge_rlcsa rlcsa_test sampler_test display_test document_graph
 
 jar: rlcsa.jar
 
@@ -63,6 +63,9 @@ rlcsa.so: $(OBJS) $(SWIG_OBJS)
 
 depend:
 	g++ -MM *.cpp bits/*.cpp misc/*.cpp utils/*.cpp > dependencies.mk
+
+main: main.o librlcsa.a
+	$(CXX) $(CXXFLAGS) -o main main.o librlcsa.a -lz
 
 rlcsa_test: rlcsa_test.o librlcsa.a
 	$(CXX) $(CXXFLAGS) -o rlcsa_test rlcsa_test.o librlcsa.a
