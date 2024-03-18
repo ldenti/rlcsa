@@ -282,10 +282,8 @@ RLCSABuilder::addRLCSA(RLCSA* increment, uchar* sequence, usint length, bool del
   double mark = readTimer();
   parallelSort(ranks, ranks + length);
   fprintf(stderr, "[M::%s] sorted ranks in %.3f sec\n", __func__, realtime() - rt);
-  rt = realtime();
   #pragma omp parallel for schedule(static)
   for(usint i = 0; i < length; i++) { ranks[i] += i + 1; }
-  fprintf(stderr, "[M::%s] updated ranks in %.3f sec\n", __func__, realtime() - rt);
   this->sort_time += readTimer() - mark;
 
   this->mergeRLCSA(increment, ranks, length);

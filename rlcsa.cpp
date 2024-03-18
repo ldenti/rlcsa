@@ -1608,7 +1608,6 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
 
 
   // Build character tables etc.
-  double rt = realtime();
   usint distribution[CHARS];
   for(usint c = 0; c < CHARS; c++) { distribution[c] = 0; }
   for(usint i = 0; i < bytes; i++) { distribution[(usint)data[i]]++; }
@@ -1616,7 +1615,7 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
   this->alphabet = new Alphabet(distribution); this->data_size = this->alphabet->getDataSize();
 
   // Build suffix array.
-  rt = realtime();
+  double rt = realtime();
   short_pair* sa = 0;
   if(multiple_sequences)
   {
@@ -1634,7 +1633,6 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
   }
   if(delete_data) { delete[] data; }
   fprintf(stderr, "[M::%s] built SA in %.3f sec\n", __func__, realtime() - rt);
-  // rt = realtime();
 
   // Sample SA.
   if(sample_sa)
@@ -1649,10 +1647,9 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
   // Build Psi.
   #pragma omp parallel for schedule(static)
   for(usint i = 0; i < bytes; i++) { sa[i].first = sa[(sa[i].first + 1) % bytes].second; }
-//    fprintf(stderr, "[M::%s] built PSI in %.3f sec\n", __func__, realtime() - rt);
-//    rt = realtime();
 
   // Build RLCSA.
+  rt = realtime();
   #pragma omp parallel for schedule(dynamic, 1)
   for(usint c = 0; c < CHARS; c++)
   {
@@ -1678,8 +1675,7 @@ RLCSA::buildRLCSA(uchar* data, usint* ranks, usint bytes, usint block_size, usin
     this->array[c] = new PsiVector(encoder, this->data_size + this->number_of_sequences);
   }
   delete[] sa;
-  // fprintf(stderr, "[M::%s] built RLCSA in %.3f sec\n", __func__, realtime() - rt);
-
+  fprintf(stderr, "[M::%s] built RLCSA in %.3f sec\n", __func__, realtime() - rt);
 
   this->ok = true;
 }
