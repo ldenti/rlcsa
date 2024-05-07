@@ -544,6 +544,12 @@ class FMD : public RLCSA
      */
     static pair_type getStats();
       
+    /**
+     * Get an FMDPosition for the part of the BWT for things starting with the
+     * given character.
+     */
+    FMDPosition getCharPosition(usint c) const;
+
   protected:
     // How many times did we extend a search while mapping?
     static usint extends;
@@ -556,12 +562,6 @@ class FMD : public RLCSA
      * Get an FMDPosition covering the whole SA.
      */
     FMDPosition getSAPosition() const;
-    
-    /**
-     * Get an FMDPosition for the part of the BWT for things starting with the
-     * given character.
-     */
-    FMDPosition getCharPosition(usint c) const;
     
     /**
      * Convert an FMDPosition in BWT coordinates to one in SA coordinates, in
